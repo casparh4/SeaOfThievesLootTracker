@@ -1,0 +1,122 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>home</title>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>player</th>
+                <th>total earnings</th>
+                <th>found loot</th>
+            </tr>
+       {%-if logged_in_player-%} 
+       
+            <tr>
+                <td class="player_name">{{logged_in_player.name}}
+                <div class="player_stats">
+                    <ul>
+                    <li>most valuable loot: {{stats.most_valuable_loot.loot.name}}</li>
+                    <li>most common loot: {{stats.most_common_loot.loot.name}}</li>
+                    <li>most successful location: {{stats.most_successful_location.name}}</li>
+                
+                </div>
+                </td>
+                <td>{{logged_in_player.earnings}}</td>
+                <td>{{logged_in_player.found_loot|length}}</td>
+            </tr>
+        
+        {%-endif-%}
+        </table>
+        <div class="map">
+        <img src="{{ url_for('static', filename='images/map.jpg') }}" alt="Map">
+
+        <span class = "enter_coord">
+            <form method="post" action="{{ url_for('home') }}">
+                <label for="coord">Enter Coordinate:</label>
+                <input type="hidden" name="form_id" value="enter_coord">
+                <input type="text" id="coord" name="coord" placeholder="e.g., A1" value="{{ player_coordinate }}">
+                <button type="submit">Go</button>
+            </form>
+        </span>
+
+            {% if nav %}
+        <span class = "nav">
+                <p class = "nav_title">Navigation:</p>
+                <ul>
+                    {% if nav.nearby %}
+                        <li>Nearby: {{ nav.nearby }}</li>
+                    {% endif %}
+                    {% if nav.north %}
+                        <li>North: {{ nav.north }}</li>
+                    {% endif %}
+                    {% if nav.south %}
+                        <li>South: {{ nav.south }}</li>
+                    {% endif %}
+                    {% if nav.east %}
+                        <li>East: {{ nav.east }}</li>
+                    {% endif %}
+                    {% if nav.west %}
+                        <li>West: {{ nav.west }}</li>
+                    {% endif %}
+                </ul>
+        </span>
+            {% endif %}
+        <span class = "add_loot">
+            <p class = "nav_title">Add Found Loot</p>
+            <form method="post" action="{{ url_for('home') }}">
+                <input type="hidden" name="form_id" value="add_loot"> 
+                
+                {% if loot_suggestions %}
+                <p><b>invalid loot name, suggestions:</b></p>
+                <ul>
+                {% for loot in loot_suggestions %}
+                <li onclick = "document.getElementById('loot_name').value = '{{loot.name}}'">{{loot.name}}</li>
+                </ul>
+                {% endfor %}
+                {% endif %}
+                <input type="text" id="loot_name" name="loot_name" placeholder="Loot Name">
+        
+                
+                {% if location_suggestions %}
+                <p><b>invalid location, suggestions:</b></p>
+                <ul>
+                {% for location in location_suggestions %}
+                <li onclick = "document.getElementById('loot_location').value = '{{location.name}}'">{{location.name}}</li>
+                </ul>
+                {% endfor %}
+                {% endif %}
+                <input type="text" name="loot_location" id="loot_location" placeholder="Location Found">
+                
+                <button type="submit">Add</button>
+            </form>
+            <form method="post" action="{{ url_for('home') }}">
+                <input type="hidden" name="form_id" value="sell_loot">
+                <button type="submit">Sold loot?</button>
+            </form>
+        </span>
+            
+
+    <div class="grid">
+        {% for row in range(1, 27) %}
+            {% for col in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+            {% if player_coordinate == col ~ row %}
+                <div class="cell" data-coord="{{ col }}{{ row }}"><img  src="{{ url_for('static', filename='images/marker.jpg') }}" alt="You are here"></div>
+            
+            {% elif (col ~ row) in past_coords %}
+                <div class="cell" data-coord="{{ col }}{{ row }}"><img class="past_marker" src="{{ url_for('static', filename='images/pastmarker.jpg') }}" alt="Visited"></div>
+            
+            {% else %}
+                <div class="cell" data-coord="{{ col }}{{ row }}"></div>
+            {% endif %}
+            {% endfor %}
+        {% endfor %}
+        </div>
+
+    </div>
+
+        
+        <hr/>
+      
+    </body>
+</html>
